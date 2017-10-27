@@ -1,4 +1,6 @@
 var gulp = require('gulp');
+// 删除文件
+var clean = require('gulp-clean');
 //- 多个文件合并为一个；
 var concat = require('gulp-concat');                            
 //- 压缩CSS为一行；
@@ -32,6 +34,11 @@ gulp.task('concatjsLib', function() {
         //压缩
         .pipe(uglify())
         .pipe(gulp.dest('./dist/js/'));
+});
+
+gulp.task('clean-scripts', function () {
+  return gulp.src('app/tmp/*.js', {read: false})
+    .pipe(clean());
 });
 
 gulp.task('concatjs', function() {
