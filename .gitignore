@@ -1,3 +1,5 @@
 dist
 node_modules/
 rev
+.idea
+gulpMoal.iml
