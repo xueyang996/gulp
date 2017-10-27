@@ -1,4 +1,5 @@
-var pageOption = {
+var typeId,
+    pageOption = {
         firstBtnText: '首页',
         lastBtnText: '末页',
         showInfo: true,
@@ -66,7 +67,7 @@ function getNavBar() {
     callback();
 }
 
-function getContent(typeId, pageSize, pageNo) {
+function getContent(pageSize, pageNo) {
     var dataInput = {
         pageSize: pageSize || 10,
         pageNo: pageNo || 1,
@@ -99,10 +100,10 @@ function getContent(typeId, pageSize, pageNo) {
 
         if (!$('#app-store-pagination').pagination()) {
             $('#app-store-pagination').pagination(pageOption).on('pageClicked  jumpClicked', function(event, data) {
-                    self.getContent(typeId, data.pageSize, data.pageIndex + 1);
+                    self.getContent(data.pageSize, data.pageIndex + 1);
                 });
         } else {
-            if (pageNoI === 1) {
+            if (dataInput.pageNo === 1) {
                 $('#app-store-pagination').pagination('setPageIndex', 0);
             }
 
@@ -118,7 +119,8 @@ $(document).ready(function(){
         var $this = $(this);
         $this.parent().find('li').removeClass('selected');
         $this.addClass('selected');
-        getContent($this.data('id'));
+        typeId = $this.data('id');
+        getContent();
     });
     getNavBar();
 });

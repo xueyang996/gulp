@@ -1,49 +1,64 @@
 var gulp = require('gulp');
-var concat = require('gulp-concat');                            //- 多个文件合并为一个；
-var minifyCss = require('gulp-minify-css');                     //- 压缩CSS为一行；
+//- 多个文件合并为一个；
+var concat = require('gulp-concat');                            
+//- 压缩CSS为一行；
+var minifyCss = require('gulp-minify-css');                  
+//- 对文件名加MD5后缀
 var rev = require('gulp-rev');
+//- 文件重命名
 var rename=require('gulp-rename');
-var uglify=require('gulp-uglify');                              //- 对文件名加MD5后缀
-var revCollector = require('gulp-rev-collector');               //- 路径替换
+//- 压缩JS为一行；
+var uglify=require('gulp-uglify');      
+//- 路径替换
+var revCollector = require('gulp-rev-collector');
 
-gulp.task('concatcss', function() {                                //- 创建一个名为 concat 的 task
-    gulp.src(['./src/css/*.css'])                               //- 需要处理的css文件，放到一个字符串数组里
-        .pipe(concat('main.min.css'))                           //- 合并后的文件名
-        .pipe(minifyCss())                                      //- 压缩处理成一行
-        .pipe(rev())                                            //- 文件名加MD5后缀
-        .pipe(gulp.dest('./dist/css/'))                         //- 输出文件本地
-        .pipe(rev.manifest({
-            path: './rev-manifest.json',
-            merge: true}))                                   //- 生成一个rev-manifest.json
-        .pipe(gulp.dest('./rev'));                              //- 将 rev-manifest.json 保存到 rev 目录内
-
-
+//- 创建一个名为 concat 的 task
+gulp.task('concatcss', function() {  
+    //- 需要处理的css文件，放到一个字符串数组里
+    gulp.src(['./src/css/*.css'])
+        //- 合并后的文件名
+        .pipe(concat('main.min.css'))                           
+        //- 压缩处理成一行
+        .pipe(minifyCss())                                           
+        //- 输出文件本地
+        .pipe(gulp.dest('./dist/css/'));
 });
 
 gulp.task('concatjsLib', function() {
-    gulp.src(['./src/lib/jquery.min.js','./src/lib/mricode.pagination.js'])  //选择合并的JS
-        .pipe(concat('vendor.js'))   //合并js
-        .pipe(gulp.dest('./dist/js'))         //输出
-        .pipe(rename({suffix:'.min'}))     //重命名
-        .pipe(uglify())                    //压缩
-        .pipe(gulp.dest('dist/js'));            //输出 
-
+    //选择合并的JS
+    gulp.src(['./src/lib/jquery.min.js','./src/lib/mricode.pagination.js', './src/lib/*.js'], {base: './src/lib'})
+        //合并js
+        .pipe(concat('vendor.min.js'))   
+        //压缩
+        .pipe(uglify())
+        .pipe(gulp.dest('./dist/js/'));
 });
 
 gulp.task('concatjs', function() {
-    gulp.src(['./src/js/*.js'])  //选择合并的JS
-        .pipe(concat('main.js'))   //合并js
-        .pipe(gulp.dest('./dist/js'))         //输出
-        .pipe(rename({suffix:'.min'}))     //重命名
-        // .pipe(uglify())                    //压缩
-        .pipe(gulp.dest('dist/js'));            //输出 
-
+    // 选择合并的JS
+    gulp.src(['./src/js/*.js'])
+        .pipe(concat('main.js'))
+        .pipe(gulp.dest('./dist/js/'));
 });
 
-gulp.task('rev', function() {
-    gulp.src(['./rev/*.json', './index.html'])   //- 读取 rev-manifest.json 文件以及需要进行css名替换的文件
-        .pipe(revCollector())                                   //- 执行文件内css名的替换
-        .pipe(gulp.dest('./dist/'));                     //- 替换后的文件输出的目录
+gulp.task('rev', () =>
+    // 请参照npm 官网上的例子
+    // by default, gulp would pick `assets/css` as the base, 
+    // so we need to set it explicitly: 
+    gulp.src(['./dist/css/*.css', './dist/js/*.js'], {base: 'dist'})
+        .pipe(rev())
+        .pipe(gulp.dest('./dist/assets'))
+        .pipe(rev.manifest())
+        .pipe(gulp.dest('./dist/assets'))
+);
+
+gulp.task('revCollector', function() {
+    //- 读取 rev-manifest.json 文件以及需要进行css名替换的文件
+    gulp.src(['./dist/assets/rev-manifest.json', './index.html'])
+        //- 执行文件内css名的替换
+        .pipe(revCollector())
+        //- 替换后的文件输出的目录
+        .pipe(gulp.dest('./dist/assets/'));
 });
 
 gulp.task('watch',function(){
@@ -53,4 +68,4 @@ gulp.task('watch',function(){
     gulp.watch('./index.html',['rev']);
 })
 
-gulp.task('default', ['concatcss', 'concatjsLib', 'concatjs','rev']);
+gulp.task('default', ['concatcss', 'concatjsLib', 'concatjs','rev', 'revCollector']);
