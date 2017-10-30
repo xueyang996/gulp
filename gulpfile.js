@@ -13,6 +13,17 @@ var rename=require('gulp-rename');
 var uglify=require('gulp-uglify');      
 //- 路径替换
 var revCollector = require('gulp-rev-collector');
+//- es6转换
+var babel = require('gulp-babel');
+
+// es6转化为es5
+gulp.task('babel', () => {
+    gulp.src(['src/js/nextJsTest.js'])
+        .pipe(babel({
+            presets: ['env']
+        }))
+        .pipe(gulp.dest('./dist'))
+});
 
 //- 创建一个名为 concat 的 task
 gulp.task('concatcss', function() {  
